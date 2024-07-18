@@ -13,11 +13,14 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as FooImport } from './routes/foo'
+import { Route as BarBazImport } from './routes/bar/baz'
 
 // Create Virtual Routes
 
 const AboutLazyImport = createFileRoute('/about')()
 const IndexLazyImport = createFileRoute('/')()
+const BarIndexLazyImport = createFileRoute('/bar/')()
 
 // Create/Update Routes
 
@@ -26,10 +29,25 @@ const AboutLazyRoute = AboutLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
 
+const FooRoute = FooImport.update({
+  path: '/foo',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const BarIndexLazyRoute = BarIndexLazyImport.update({
+  path: '/bar/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/bar/index.lazy').then((d) => d.Route))
+
+const BarBazRoute = BarBazImport.update({
+  path: '/bar/baz',
+  getParentRoute: () => rootRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -42,11 +60,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/foo': {
+      id: '/foo'
+      path: '/foo'
+      fullPath: '/foo'
+      preLoaderRoute: typeof FooImport
+      parentRoute: typeof rootRoute
+    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/bar/baz': {
+      id: '/bar/baz'
+      path: '/bar/baz'
+      fullPath: '/bar/baz'
+      preLoaderRoute: typeof BarBazImport
+      parentRoute: typeof rootRoute
+    }
+    '/bar/': {
+      id: '/bar/'
+      path: '/bar'
+      fullPath: '/bar'
+      preLoaderRoute: typeof BarIndexLazyImport
       parentRoute: typeof rootRoute
     }
   }
@@ -56,7 +95,10 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
+  FooRoute,
   AboutLazyRoute,
+  BarBazRoute,
+  BarIndexLazyRoute,
 })
 
 /* prettier-ignore-end */
@@ -68,14 +110,26 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/foo",
+        "/about",
+        "/bar/baz",
+        "/bar/"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
+    "/foo": {
+      "filePath": "foo.tsx"
+    },
     "/about": {
       "filePath": "about.lazy.tsx"
+    },
+    "/bar/baz": {
+      "filePath": "bar/baz.tsx"
+    },
+    "/bar/": {
+      "filePath": "bar/index.lazy.tsx"
     }
   }
 }
